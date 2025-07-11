@@ -642,10 +642,10 @@ function disableDuplicatePilot() {
     </div>
     <label><input type="checkbox" class="patient-checkbox"> Patient</label>
     <label><input type="checkbox" class="escort-checkbox"> Escort</label>
-    <label>Fuel up Lift (kg):</label>
+    <label for="fuelup">Fuel up Lift (kg):</label>
     <input type="number" class="legfuel">
     <button onclick="removeLeg(this)">Remove</button>
-  `;
+  `; // ✅ This backtick was missing
 
   document.getElementById('legs').appendChild(newRow);
 
