@@ -627,6 +627,7 @@ function disableDuplicatePilot() {
 
   const newRow = document.createElement('div');
   newRow.className = 'leg-row';
+
   newRow.innerHTML = `
     <label>Leg ${legCount}:</label>
     <select class="from" onchange="toggleSceneInputs(this)"></select>
@@ -642,19 +643,22 @@ function disableDuplicatePilot() {
     </div>
     <label><input type="checkbox" class="patient-checkbox"> Patient</label>
     <label><input type="checkbox" class="escort-checkbox"> Escort</label>
-    <label for="fuelup">Fuel up Lift (kg):</label>
+    <label>Fuel up Lift (kg):</label>
     <input type="number" class="legfuel">
-    <button onclick="removeLeg(this)">Remove</button>
-  `; // ✅ This backtick was missing
+    <button class="remove-leg-btn">Remove</button>
+  `;
 
+  // Append the new row
   document.getElementById('legs').appendChild(newRow);
 
+  // Populate dropdowns
   const from = newRow.querySelector('.from');
   const to = newRow.querySelector('.to');
   const region = document.getElementById('region-select').value;
   populateDropdown(from, region);
   populateDropdown(to, region);
 
+  // Auto-fill previous TO → next FROM
   if (prevTo.value === "SCENE") {
     from.value = "SCENE";
     toggleSceneInputs(from);
@@ -663,6 +667,14 @@ function disableDuplicatePilot() {
   } else {
     from.value = prevTo.value;
   }
+
+  // ✅ Attach remove handler
+  newRow.querySelector('.remove-leg-btn').addEventListener('click', function () {
+    newRow.remove();
+    document.querySelectorAll('.leg-row').forEach((row, idx) => {
+      row.querySelector('label').textContent = `Leg ${idx + 1}:`;
+    });
+  });
 }
 
     function haversine(lat1, lon1, lat2, lon2) {
