@@ -722,26 +722,26 @@ function disableDuplicatePilot() {
     let fLat, fLon, tLat, tLon, fName, tName;
 
     if (fromSel.value === "SCENE") {
-      fLat = parseFloat(leg.querySelector('.from-lat').value);
-      fLon = parseFloat(leg.querySelector('.from-lon').value);
-      fName = `SCENE (${fLat}, ${fLon})`;
-    } else {
-      const f = waypoints[fromSel.value];
-      fLat = f.lat;
-      fLon = f.lon;
-      fName = fromSel.value;
-    }
+  fLat = parseFloat(leg.querySelector('.from-lat').value);
+  fLon = parseFloat(leg.querySelector('.from-lon').value);
+  fName = `SCENE (${fLat}, ${fLon})`;
+} else {
+  const f = waypoints[fromSel.value];
+  fLat = f.lat;
+  fLon = f.lon;
+  fName = f.name; // ← use the full name instead of the code
+}
 
-    if (toSel.value === "SCENE") {
-      tLat = parseFloat(leg.querySelector('.to-lat').value);
-      tLon = parseFloat(leg.querySelector('.to-lon').value);
-      tName = `SCENE (${tLat}, ${tLon})`;
-    } else {
-      const t = waypoints[toSel.value];
-      tLat = t.lat;
-      tLon = t.lon;
-      tName = toSel.value;
-    }
+if (toSel.value === "SCENE") {
+  tLat = parseFloat(leg.querySelector('.to-lat').value);
+  tLon = parseFloat(leg.querySelector('.to-lon').value);
+  tName = `SCENE (${tLat}, ${tLon})`;
+} else {
+  const t = waypoints[toSel.value];
+  tLat = t.lat;
+  tLon = t.lon;
+  tName = t.name; // ← use the full name instead of the code
+}
 
     const d = haversine(fLat, fLon, tLat, tLon);
     const h = Math.round(Math.atan2(
