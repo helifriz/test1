@@ -657,9 +657,15 @@ populateDropdown(to, region);
   const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
   const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
   const seat1c = parseFloat(document.getElementById('seat1c').value) || 0;
-  const patientWeight = parseFloat(leg.querySelector('.patient')?.value) || 0;
-  const escortWeight = parseFloat(leg.querySelector('.escort')?.value) || 0;
-  const fuelUp = parseFloat(leg.querySelector('.legfuel')?.value) || 0;
+  const patientIncluded = leg.querySelector('.patient-checkbox')?.checked;
+const escortIncluded = leg.querySelector('.escort-checkbox')?.checked;
+const fuelUp = parseFloat(leg.querySelector('.legfuel')?.value) || 0;
+
+const PatientWeight = parseFloat(document.getElementById('patient').value) || 0;
+const EscortWeight = parseFloat(document.getElementById('escort').value) || 0;
+
+const patientWeight = patientIncluded ? globalPatientWeight : 0;
+const escortWeight = escortIncluded ? globalEscortWeight : 0;
   const baggage = parseFloat(document.getElementById('baggage').value) || 0;
 
   const selectedHeli = document.getElementById('helicopter').value;
@@ -723,7 +729,6 @@ const legFuel = Math.round(timeHr * burn);
 const patientIncluded = leg.querySelector('.patient-checkbox')?.checked;
 const totalWeight = heliWeight + fuel + leftWeight + rightWeight +
   seat1a + seat2a + seat1c + baggage + patientWeight + escortWeight;
-  lastWeight = totalWeight;
 
 // ⛽ Now burn the leg’s fuel
 fuel -= legFuel;
