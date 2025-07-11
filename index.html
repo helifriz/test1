@@ -615,56 +615,51 @@ function disableDuplicatePilot() {
     }
 
     function addLeg() {
-      const legCount = document.querySelectorAll('.leg-row').length + 1;
-      const prevLeg = document.querySelector(`.leg-row:nth-child(${legCount - 1})`);
-      const prevTo = prevLeg.querySelector('.to');
-      const prevToLat = prevLeg.querySelector('.to-lat')?.value;
-      const prevToLon = prevLeg.querySelector('.to-lon')?.value;
+  const legCount = document.querySelectorAll('.leg-row').length + 1;
+  const prevLeg = document.querySelector(`.leg-row:nth-child(${legCount - 1})`);
+  const prevTo = prevLeg.querySelector('.to');
+  const prevToLat = prevLeg.querySelector('.to-lat')?.value;
+  const prevToLon = prevLeg.querySelector('.to-lon')?.value;
 
-      const newRow = document.createElement('div');
-      newRow.className = 'leg-row';
-      newRow.innerHTML = `
-        <label>Leg ${legCount}:</label>
-        <select class="from" onchange="toggleSceneInputs(this)"></select>
-        <div class="scene-inputs from-scene">
-          Lat: <input type="number" step="0.0001" class="from-lat">
-          Lon: <input type="number" step="0.0001" class="from-lon">
-        </div>
-        ➝
-        <select class="to" onchange="toggleSceneInputs(this)"></select>
-        <div class="scene-inputs to-scene">
-          Lat: <input type="number" step="0.0001" class="to-lat">
-          Lon: <input type="number" step="0.0001" class="to-lon">
-        </div>
-      <label><input type="checkbox" class="patient-checkbox"> Patient</label>
-      <label><input type="checkbox" class="escort-checkbox"> Escort</label>
-      <label for="fuelup">Fuel up Lift (kg):</label>
-      <input type="number" class="legfuel">
-      <button onclick="removeLeg(this)">Remove</button>
-      document.getElementById('legs').appendChild(newRow);
-      const from = newRow.querySelector('.from');
-      const to = newRow.querySelector('.to');
-      const region = document.getElementById('region-select').value;
-populateDropdown(from, region);
-populateDropdown(to, region);
+  const newRow = document.createElement('div');
+  newRow.className = 'leg-row';
+  newRow.innerHTML = `
+    <label>Leg ${legCount}:</label>
+    <select class="from" onchange="toggleSceneInputs(this)"></select>
+    <div class="scene-inputs from-scene">
+      Lat: <input type="number" step="0.0001" class="from-lat">
+      Lon: <input type="number" step="0.0001" class="from-lon">
+    </div>
+    ➝
+    <select class="to" onchange="toggleSceneInputs(this)"></select>
+    <div class="scene-inputs to-scene">
+      Lat: <input type="number" step="0.0001" class="to-lat">
+      Lon: <input type="number" step="0.0001" class="to-lon">
+    </div>
+    <label><input type="checkbox" class="patient-checkbox"> Patient</label>
+    <label><input type="checkbox" class="escort-checkbox"> Escort</label>
+    <label>Fuel up Lift (kg):</label>
+    <input type="number" class="legfuel">
+    <button onclick="removeLeg(this)">Remove</button>
+  `;
 
+  document.getElementById('legs').appendChild(newRow);
 
-      if (prevTo.value === "SCENE") {
-        from.value = "SCENE";
-        toggleSceneInputs(from);
-        newRow.querySelector('.from-lat').value = prevToLat;
-        newRow.querySelector('.from-lon').value = prevToLon;
-      } else {
-        from.value = prevTo.value;
-      }
-    }
+  const from = newRow.querySelector('.from');
+  const to = newRow.querySelector('.to');
+  const region = document.getElementById('region-select').value;
+  populateDropdown(from, region);
+  populateDropdown(to, region);
 
-    function removeLeg(btn) {
-      btn.parentNode.remove();
-      document.querySelectorAll('.leg-row').forEach((row, idx) => {
-        row.querySelector('label').textContent = `Leg ${idx + 1}:`;
-      });
-    }
+  if (prevTo.value === "SCENE") {
+    from.value = "SCENE";
+    toggleSceneInputs(from);
+    newRow.querySelector('.from-lat').value = prevToLat;
+    newRow.querySelector('.from-lon').value = prevToLon;
+  } else {
+    from.value = prevTo.value;
+  }
+}
 
     function haversine(lat1, lon1, lat2, lon2) {
       const R = 6371;
