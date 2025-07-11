@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Helicopter Route Planner</title>
+  <style>
+    body {
+      background-color: #1c1c1e;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      color: #0fbcf9;
+      margin-top: 20px;
+    }
+    label, select, input, button {
+      font-size: 16px;
+      margin: 8px;
+    }
+    select, input, button {
+      background-color: #2c2c2e;
+      color: #f5f5f5;
+      border: 1px solid #3a3a3c;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    input[type=number] {
+      width: 100px;
+    }
+    button:hover {
+      background-color: #0fbcf9;
+      color: #1c1c1e;
+      cursor: pointer;
+    }
+    .scene-inputs {
+      display: none;
+      margin-top: 5px;
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: normal;
+      line-height: 1.6;
+    }
+    .leg-row {
+      margin-bottom: 10px;
+    }
+    table {
+      margin: 10px auto;
+      border-collapse: collapse;
+      width: 95%;
+      background-color: #2c2c2e;
+      border: 1px solid #3a3a3c;
+    }
+    th, td {
+      border: 1px solid #3a3a3c;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #3a3a3c;
+      color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Helicopter Route Planner</h1>
+
+  <div>
+  <label for="helicopter">Helicopter Reg:</label>
+  <select id="helicopter"></select>
+    <label for="region-select">Base:</label>
+    <select id="region-select" onchange="populateAllDropdowns()">
+      <option value="ALL">All Regions</option>
+      <option value="Prince George">Prince George</option>
+      <option value="Prince Rupert">Prince Rupert</option>
+      <option value="Kamloops">Kamloops</option>
+      <option value="Parksville">Parksville</option>
+      <option value="Vancouver">Vancouver</option>
+    </select>
+    <label for="startFuel">Start Fuel (kg):</label>
+    <input type="number" id="startFuel" value="700">
+  </div>
+  <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
+  <label for="leftPilot">Left Seat Pilot:</label>
+  <select id="leftPilot"></select>
+
+  <label for="rightPilot">Right Seat Pilot:</label>
+  <select id="rightPilot"></select>
+
+  <label for="baggage">Baggage (kg):</label>
+  <input type="number" id="baggage" style="width: 80px;">
+</div>
+
+ <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
+  <label for="seat1a">Seat 1A (kg):</label>
+  <input type="number" id="seat1a" style="width: 80px;">
+
+  <label for="seat2a">Seat 2A (kg):</label>
+  <input type="number" id="seat2a" style="width: 80px;">
+
+  <label for="seat1c">Seat 1C (kg):</label>
+  <input type="number" id="seat1c" style="width: 80px;">
+</div>
+<div>
+    <label for="patient">Patient (kg):</label>
+    <input type="number" id="patient">
+    <label for="speed">Cruise Speed (kt):</label>
+    <input type="number" id="speed" value="115">
+    <label for="fuel">Fuel Burn (kg/hr):</label>
+    <input type="number" id="fuel" value="300">
+  </div>
+
+  <div id="legs">
+    <div class="leg-row">
+      <label>Leg 1:</label>
+      <select class="from" onchange="toggleSceneInputs(this)"></select>
+      <div class="scene-inputs from-scene">
+        Lat: <input type="number" step="0.0001" class="from-lat">
+        Lon: <input type="number" step="0.0001" class="from-lon">
+      </div>
+      ➝
+      <select class="to" onchange="toggleSceneInputs(this)"></select>
+      <div class="scene-inputs to-scene">
+        Lat: <input type="number" step="0.0001" class="to-lat">
+        Lon: <input type="number" step="0.0001" class="to-lon">
+      </div>
+      <label><input type="checkbox" class="patient-checkbox"> Patient On Board</label>
+      <button onclick="removeLeg(this)">Remove</button>
+    </div>
+  </div>
+
+  <button onclick="addLeg()">Add Leg</button>
+  <button onclick="calculateRoute()">Calculate Route</button>
+
+  <div id="result"></div>
+
+  <script>
+
+    const HELICOPTERS = [
+  { reg: "C-GHAA", weight: 1560 },
+  { reg: "C-GHBB", weight: 1585 },
+  { reg: "C-GHCC", weight: 1600 },
+  { reg: "C-GHDD", weight: 1570 }
+];
+
+function populateHelicopterDropdown() {
+  const heliSelect = document.getElementById('helicopter');
+  heliSelect.innerHTML = "";
+
+  // Add placeholder
+  const placeholder = new Option("Select Helicopter", "");
+  heliSelect.add(placeholder);
+
+  // Add helicopters by reg only (no weight shown)
+  HELICOPTERS.forEach(heli => {
+    const option = new Option(heli.reg, heli.reg);
+    heliSelect.add(option);
+  });
+}
+
+
+    const waypoints = {
+      // VANCOUVER REGION
+CAB5: {
+  name: "Abbotsford Hospital",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.0361,
+  lon: -122.3141
+},
+CYXX: {
+  name: "Abbotsford",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.0253,
+  lon: -122.3608
+},
+BIS: {
+  name: "Bowen Island",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.3775,
+  lon: -123.3350
+},
+BIG: {
+  name: "Bowen Island (Golf)",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.3408,
+  lon: -123.3605
+},
+CFR6: {
+  name: "Coquitlam Fire & Rescue",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.2916,
+  lon: -122.7922
+},
+CBL7: {
+  name: "Cortes Island",
+  regions: ["Vancouver","Parksville", "ALL"],
+  lat: 50.0586,
+  lon: -124.9816
+},
+CAK3: {
+  name: "Delta Heritage",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.0781,
+  lon: -122.9375
+},
+CAF6: {
+  name: "Big Bay",
+  regions: ["Vancouver", "Parksville", "ALL"],
+  lat: 50.3921, 
+  lon: -125.1369
+},
+CAG6: {
+  name: "Blind Channel",
+  regions: ["Vancouver", "Parksville", "ALL"],
+  lat: 50.4132,
+  lon: -125.5017
+},
+CAP3: {
+  name: "Sechelt",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.4603,
+  lon: -123.7168
+},
+CYNJ: {
+  name: "Langley",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.1008,
+  lon: -122.6306
+},
+CZBB: {
+  name: "Boundary Bay",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.0779,
+  lon: -123.0071
+},
+CYVR: {
+  name: "Vancouver",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.1939,
+  lon: -123.1833
+},
+CBC7: {
+  name: "Vancouver Harbour Heliport",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.2869,
+  lon: -123.1061
+},
+CYPK: {
+  name: "Pitt Meadows",
+  regions: ["Vancouver", "ALL"],
+  lat: 49.2161,
+  lon: -122.7086
+},
+
+// PARKSVILLE REGION //
+CAT6: {
+  name: "Campbell River Hospital",
+  regions: ["Parksville", "ALL"],
+  lat: 50.0086,
+  lon: -125.2427
+},
+CYAL: {
+  name: "Alert Bay",
+  regions: ["Parksville", "ALL"],
+  lat: 50.5822,
+  lon: -126.9158
+},
+CAH3: {
+  name: "Courtenay Airpark",
+  regions: ["Parksville", "ALL"],
+  lat: 49.6794,
+  lon: -124.9816
+},
+WCR: {
+  name: "Campbell River SPIT",
+  regions: ["Parksville", "ALL"],
+  lat: 50.0452,
+  lon: -125.2536
+},
+CBV8: {
+  name: "Comox Valley Hospital",
+  regions: ["Parksville", "ALL"],
+  lat: 49.7122,
+  lon: -124.9694
+},
+BAP: {
+  name: "Bamfield",
+  regions: ["Parksville", "ALL"],
+  lat: 48.8227,
+  lon: -125.1177
+},
+CWS: {
+  name: "Chemainus",
+  regions: ["Parksville", "ALL"],
+  lat: 48.9183,
+  lon: -123.7106
+},
+CDD: {
+  name: "Colwood DND",
+  regions: ["Parksville", "ALL"],
+  lat: 48.4481,
+  lon: -123.4541
+},
+CYCD: {
+  name: "Nanaimo",
+  regions: ["Parksville", "ALL"],
+  lat: 49.0556,
+  lon: -123.8697
+},
+CYAZ: {
+  name: "Tofino",
+  regions: ["Parksville", "ALL"],
+  lat: 49.0759,
+  lon: -125.7700
+},
+CYWH: {
+  name: "Victoria Inner Harbour",
+  regions: ["Parksville", "ALL"],
+  lat: 48.4308,
+  lon: -123.4317
+},
+CYYJ: {
+  name: "Victoria International",
+  regions: ["Parksville", "ALL"],
+  lat: 48.6469,
+  lon: -123.4269
+},
+CAT4: {
+  name: "Qualicum",
+  regions: ["Parksville", "ALL"],
+  lat: 49.3394,
+  lon: -124.3965
+},
+
+// KAMLOOPS REGION
+AHL: {
+  name: "Ashcroft Hospital",
+  regions: ["Kamloops", "ALL"],
+  lat: 50.7350,
+  lon: -121.2810
+},
+CYYF: {
+  name: "Penticton",
+  regions: ["Kamloops", "ALL"],
+  lat: 49.4631,
+  lon: -119.6017
+},
+CQV3: {
+  name: "Queen Victoria",
+  regions: ["Kamloops", "ALL"],
+  lat: 50.9776,
+  lon: -118.1893
+},
+CYLW: {
+  name: "Kelowna International",
+  regions: ["Kamloops", "ALL"],
+  lat: 49.9561,
+  lon: -119.3772
+},
+CYCG: {
+  name: "West Kootenay Regional",
+  regions: ["Kamloops", "ALL"],
+  lat: 49.2964,
+  lon: -117.6325
+},
+
+// PRINCE GEORGE REGION
+CAJ4: {
+  name: "Anahim Lake",
+  regions: ["Prince George", "ALL"],
+  lat: 52.4550,
+  lon: -125.3080
+},
+CYBD: {
+  name: "Bella Coola Heliport",
+  regions: ["Prince George", "ALL"],
+  lat: 52.3875,
+  lon: -126.5958
+},
+CYPZ: {
+  name: "Burns Lake",
+  regions: ["Prince George", "ALL"],
+  lat: 54.3772,
+  lon: -125.9526
+},
+CYJM: {
+  name: "Fort St James",
+  regions: ["Prince George", "ALL"],
+  lat: 54.3966,
+  lon: -124.2633
+},
+CBZ9: {
+  name: "Fraser Lake",
+  regions: ["Prince George", "ALL"],
+  lat: 54.0133,
+  lon: -124.7683
+},
+CYZY: {
+  name: "Mackenzie",
+  regions: ["Prince George", "ALL"],
+  lat: 55.2994,
+  lon: -123.1333
+},
+CAV4: {
+  name: "McBride",
+  regions: ["Prince George", "ALL"],
+  lat: 53.3150,
+  lon: -120.1700
+},
+CYXT: {
+  name: "Northwest Terrace",
+  regions: ["Prince Rupert", "ALL"],
+  lat: 54.4685,
+  lon: -128.5762
+},
+CBN9: {
+  name: "Tsay Keh",
+  regions: ["Prince George", "ALL"],
+  lat: 56.9066,
+  lon: -124.9666
+},
+CBX7: {
+  name: "Tumbler Ridge",
+  regions: ["Prince George", "ALL"],
+  lat: 55.0266,
+  lon: -120.9316
+},
+CAU4: {
+  name: "Vanderhoof",
+  regions: ["Prince George", "ALL"],
+  lat: 54.0466,
+  lon: -124.0116
+},
+CYXS: {
+  name: "Prince George",
+  regions: ["Prince George", "ALL"],
+  lat: 53.8833,
+  lon: -122.6783
+},
+CYYD: {
+  name: "Smithers",
+  regions: ["Prince George", "ALL"],
+  lat: 54.8247,
+  lon: -127.1828
+},
+CYZP: {
+  name: "Sandspit",
+  regions: ["Prince Rupert", "ALL"],
+  lat: 53.2543,
+  lon: -131.8138
+},
+    };
+
+    const PILOTS = [
+  { name: "Alice Smith", weight: 78 },
+  { name: "Bob Jones", weight: 90 },
+  { name: "Charlie Lee", weight: 83 },
+  { name: "Dana White", weight: 74 }
+];
+
+
+    function populatePilotDropdowns() {
+  const left = document.getElementById('leftPilot');
+  const right = document.getElementById('rightPilot');
+
+  // Clear any existing options
+  left.innerHTML = "";
+  right.innerHTML = "";
+
+  // Add placeholder
+  const placeholder = new Option("Select Pilot", "");
+  left.add(placeholder.cloneNode(true));
+  right.add(placeholder.cloneNode(true));
+
+  // Add pilot names only
+  PILOTS.forEach(pilot => {
+    const opt1 = new Option(pilot.name, pilot.name);
+    const opt2 = new Option(pilot.name, pilot.name);
+    left.add(opt1);
+    right.add(opt2);
+  });
+}
+
+
+function disableDuplicatePilot() {
+  const left = document.getElementById('leftPilot').value;
+  const right = document.getElementById('rightPilot').value;
+
+  // Re-enable everything first
+  document.querySelectorAll('#leftPilot option, #rightPilot option').forEach(opt => {
+    opt.disabled = false;
+  });
+
+  // Disable right options matching left (if left is selected)
+  if (left) {
+    document.querySelectorAll('#rightPilot option').forEach(opt => {
+      if (opt.value === left && opt.value !== "") {
+        opt.disabled = true;
+      }
+    });
+  }
+
+  // Disable left options matching right (if right is selected)
+  if (right) {
+    document.querySelectorAll('#leftPilot option').forEach(opt => {
+      if (opt.value === right && opt.value !== "") {
+        opt.disabled = true;
+      }
+    });
+  }
+}
+
+
+    document.getElementById('leftPilot').addEventListener('change', disableDuplicatePilot);
+    document.getElementById('rightPilot').addEventListener('change', disableDuplicatePilot);
+
+    function populateDropdown(select, region) {
+  select.innerHTML = "";
+
+  // Add placeholder
+  const placeholder = new Option("Select Waypoint", "");
+  select.appendChild(placeholder);
+
+  // Add "Scene"
+  const sceneOption = new Option("Scene", "SCENE");
+  select.appendChild(sceneOption);
+
+  // Add region-filtered waypoints
+  Object.keys(waypoints)
+    .filter(code => region === "ALL" || waypoints[code].regions.includes(region))
+    .sort((a, b) => waypoints[a].name.localeCompare(waypoints[b].name))
+    .forEach(code => {
+      const option = new Option(`${waypoints[code].name} (${code})`, code);
+      select.appendChild(option);
+    });
+}
+
+
+    function populateAllDropdowns() {
+  const region = document.getElementById('region-select').value;
+  const allSelects = document.querySelectorAll('.from, .to');
+
+  allSelects.forEach(select => {
+    const selectedValue = select.value;
+    select.innerHTML = ""; // Clear everything
+
+    // Placeholder
+    const placeholder = document.createElement('option');
+    placeholder.value = "";
+    placeholder.textContent = "Select Waypoint";
+    select.appendChild(placeholder);
+
+    // Scene
+    const scene = document.createElement('option');
+    scene.value = "SCENE";
+    scene.textContent = "Scene";
+    select.appendChild(scene);
+
+    // Add filtered and sorted waypoints
+    Object.keys(waypoints)
+      .filter(code => region === "ALL" || waypoints[code].regions.includes(region))
+      .sort((a, b) => waypoints[a].name.localeCompare(waypoints[b].name))
+      .forEach(code => {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = `${waypoints[code].name} (${code})`;
+        select.appendChild(option);
+      });
+
+    // Restore value if still valid
+    const exists = Array.from(select.options).some(opt => opt.value === selectedValue);
+    if (exists) select.value = selectedValue;
+  });
+}
+
+
+    function toggleSceneInputs(select) {
+      const parent = select.closest('.leg-row');
+      const scene = parent.querySelector('.' + select.className + '-scene');
+      scene.style.display = (select.value === "SCENE") ? "block" : "none";
+    }
+
+    function addLeg() {
+      const legCount = document.querySelectorAll('.leg-row').length + 1;
+      const prevLeg = document.querySelector(`.leg-row:nth-child(${legCount - 1})`);
+      const prevTo = prevLeg.querySelector('.to');
+      const prevToLat = prevLeg.querySelector('.to-lat')?.value;
+      const prevToLon = prevLeg.querySelector('.to-lon')?.value;
+
+      const newRow = document.createElement('div');
+      newRow.className = 'leg-row';
+      newRow.innerHTML = `
+        <label>Leg ${legCount}:</label>
+        <select class="from" onchange="toggleSceneInputs(this)"></select>
+        <div class="scene-inputs from-scene">
+          Lat: <input type="number" step="0.0001" class="from-lat">
+          Lon: <input type="number" step="0.0001" class="from-lon">
+        </div>
+        ➝
+        <select class="to" onchange="toggleSceneInputs(this)"></select>
+        <div class="scene-inputs to-scene">
+          Lat: <input type="number" step="0.0001" class="to-lat">
+          Lon: <input type="number" step="0.0001" class="to-lon">
+        </div>
+        <label><input type="checkbox" class="patient-checkbox"> Patient On Board</label>
+        <button onclick="removeLeg(this)">Remove</button>`;
+      document.getElementById('legs').appendChild(newRow);
+      const from = newRow.querySelector('.from');
+      const to = newRow.querySelector('.to');
+      const region = document.getElementById('region-select').value;
+populateDropdown(from, region);
+populateDropdown(to, region);
+
+
+      if (prevTo.value === "SCENE") {
+        from.value = "SCENE";
+        toggleSceneInputs(from);
+        newRow.querySelector('.from-lat').value = prevToLat;
+        newRow.querySelector('.from-lon').value = prevToLon;
+      } else {
+        from.value = prevTo.value;
+      }
+    }
+
+    function removeLeg(btn) {
+      btn.parentNode.remove();
+      document.querySelectorAll('.leg-row').forEach((row, idx) => {
+        row.querySelector('label').textContent = `Leg ${idx + 1}:`;
+      });
+    }
+
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const toRad = x => x * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 0.539957);
+    }
+
+    function calculateRoute() {
+  const cruise = parseFloat(document.getElementById('speed').value);
+  const burn = parseFloat(document.getElementById('fuel').value);
+  let fuel = parseFloat(document.getElementById('startFuel').value);
+  const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
+  const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
+  const seat1c = parseFloat(document.getElementById('seat1c').value) || 0;
+  const patientWeight = parseFloat(document.getElementById('patient').value) || 0;
+  const baggage = parseFloat(document.getElementById('baggage').value) || 0;
+
+  const selectedHeli = document.getElementById('helicopter').value;
+  const heliWeight = HELICOPTERS.find(h => h.reg === selectedHeli)?.weight || 0;
+
+  const leftPilotName = document.getElementById('leftPilot').value;
+  const rightPilotName = document.getElementById('rightPilot').value;
+  const leftWeight = PILOTS.find(p => p.name === leftPilotName)?.weight || 0;
+  const rightWeight = PILOTS.find(p => p.name === rightPilotName)?.weight || 0;
+
+  let dist = 0, mins = 0, totalFuel = 0, lastWeight = 0;
+
+  let table = `<table><tr>
+    <th>Leg</th><th>From ➝ To</th><th>NM</th><th>Heading</th>
+    <th>Time</th><th>Fuel</th><th>Remain</th><th>Takeoff Weight (kg)</th>
+  </tr>`;
+
+  document.querySelectorAll('.leg-row').forEach((leg, i) => {
+    const fromSel = leg.querySelector('.from');
+    const toSel = leg.querySelector('.to');
+    if (!fromSel.value || !toSel.value) return;
+
+    // ... your lat/lon calculations
+    let fLat, fLon, tLat, tLon, fName, tName;
+
+if (fromSel.value === "SCENE") {
+  fLat = parseFloat(leg.querySelector('.from-lat').value);
+  fLon = parseFloat(leg.querySelector('.from-lon').value);
+  fName = `SCENE (${fLat}, ${fLon})`;
+} else {
+  const f = waypoints[fromSel.value];
+  fLat = f.lat;
+  fLon = f.lon;
+  fName = fromSel.value;
+}
+
+if (toSel.value === "SCENE") {
+  tLat = parseFloat(leg.querySelector('.to-lat').value);
+  tLon = parseFloat(leg.querySelector('.to-lon').value);
+  tName = `SCENE (${tLat}, ${tLon})`;
+} else {
+  const t = waypoints[toSel.value];
+  tLat = t.lat;
+  tLon = t.lon;
+  tName = toSel.value;
+}
+
+
+    const d = haversine(fLat, fLon, tLat, tLon);
+    const h = Math.round(Math.atan2(
+      Math.sin((tLon - fLon) * Math.PI/180) * Math.cos(tLat * Math.PI/180),
+      Math.cos(fLat * Math.PI/180) * Math.sin(tLat * Math.PI/180) -
+      Math.sin(fLat * Math.PI/180) * Math.cos(tLat * Math.PI/180) * Math.cos((tLon - fLon) * Math.PI/180)
+    ) * (180/Math.PI) + 360) % 360;
+
+    const timeHr = d / cruise;
+const min = Math.round(timeHr * 60);
+const legFuel = Math.round(timeHr * burn);
+
+// ✅ Calculate total weight BEFORE burning fuel
+const patientIncluded = leg.querySelector('.patient-checkbox')?.checked;
+const totalWeight = heliWeight + fuel + leftWeight + rightWeight +
+  seat1a + seat2a + seat1c + baggage + (patientIncluded ? patientWeight : 0);
+
+lastWeight = totalWeight;
+
+// ⛽ Now burn the leg’s fuel
+fuel -= legFuel;
+dist += d; mins += min; totalFuel += legFuel;
+
+
+    table += `<tr>
+      <td>${i+1}</td>
+      <td>${fName} ➝ ${tName}</td>
+      <td>${d}</td>
+      <td>${h.toString().padStart(3, '0')}°</td>
+      <td>${Math.floor(min/60)}h ${min%60}m</td>
+      <td>${legFuel}</td>
+      <td>${fuel}</td>
+      <td>${totalWeight}</td>
+    </tr>`;
+  });
+
+  table += `<tr>
+    <th colspan="2">TOTAL</th>
+    <th>${dist}</th><th>-</th>
+    <th>${Math.floor(mins/60)}h ${mins%60}m</th>
+    <th>${totalFuel}</th><th>${fuel}</th><th></th>
+  </tr></table>`;
+
+  document.getElementById('result').innerHTML = table;
+}
+
+
+    populatePilotDropdowns();
+    populateAllDropdowns();
+    disableDuplicatePilot();
+    populateHelicopterDropdown();
+
+  </script>
+</body>
+</html>
