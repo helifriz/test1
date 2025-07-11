@@ -106,7 +106,10 @@
   <input type="number" id="seat1c" style="width: 80px;">
 </div>
 <div>
-    
+    <label for="patient">Patient (kg):</label>
+    <input type="number" id="patient">
+    <label for="escort">Escort (kg):</label>
+    <input type="number" id="escort">
     <label for="speed">Cruise Speed (kt):</label>
     <input type="number" id="speed" value="115">
     <label for="fuel">Fuel Burn (kg/hr):</label>
@@ -610,10 +613,6 @@ function disableDuplicatePilot() {
           Lat: <input type="number" step="0.0001" class="to-lat">
           Lon: <input type="number" step="0.0001" class="to-lon">
         </div>
-        <label for="patient">Patient (kg):</label>
-      <input type="number" id="patient">
-      <label for="escort">Escort (kg):</label>
-      <input type="number" id="escort">
       <label for="fuelup">Fuel up Lift (kg):</label>
       <input type="number" id="legfuel">
         <button onclick="removeLeg(this)">Remove</button>`;
