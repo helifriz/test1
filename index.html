@@ -709,10 +709,25 @@ function disableDuplicatePilot() {
 
   let dist = 0, mins = 0, totalFuel = 0, lastWeight = 0;
 
-  let table = `<table><tr>
-    <th>Leg</th><th>From ➝ To</th><th>NM</th><th>Heading</th>
-    <th>Time</th><th>Fuel<br>(used)</th><th>Fuel<br>(remain)</th><th>Takeoff Weight (kg)</th>
-  </tr>`;
+  let table = `
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2">Leg</th>
+      <th rowspan="2">From ➝ To</th>
+      <th rowspan="2">NM</th>
+      <th rowspan="2">Heading</th>
+      <th rowspan="2">Time</th>
+      <th colspan="2">Fuel (kg)</th>
+      <th rowspan="2">Takeoff Weight (kg)</th>
+    </tr>
+    <tr>
+      <th>Used</th>
+      <th>Remain</th>
+    </tr>
+  </thead>
+  <tbody>
+`;
 
   document.querySelectorAll('.leg-row').forEach((leg, i) => {
     const fromSel = leg.querySelector('.from');
