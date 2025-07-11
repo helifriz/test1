@@ -84,9 +84,11 @@
 <body>
   <h1>Helicopter Route Planner</h1>
 
+  <!-- Top Config -->
   <div>
-  <label for="helicopter">Helicopter Reg:</label>
-  <select id="helicopter"></select>
+    <label for="helicopter">Helicopter Reg:</label>
+    <select id="helicopter"></select>
+
     <label for="region-select">Base:</label>
     <select id="region-select" onchange="populateAllDropdowns()">
       <option value="ALL">All Regions</option>
@@ -96,37 +98,51 @@
       <option value="Parksville">Parksville</option>
       <option value="Vancouver">Vancouver</option>
     </select>
+
     <label for="startFuel">Start Fuel (kg):</label>
     <input type="number" id="startFuel" value="700">
   </div>
-  <label for="leftPilot">Left Seat Pilot:</label>
-  <select id="leftPilot"></select>
-  <label for="rightPilot">Right Seat Pilot:</label>
-  <select id="rightPilot"></select>
-  <label for="baggage">Baggage (kg):</label>
-  <input type="number" id="baggage" style="width: 80px;">
-</div>
 
-  <label for="seat1a">Seat 1A (kg):</label>
-  <input type="number" id="seat1a" style="width: 80px;">
+  <!-- Crew + baggage -->
+  <div>
+    <label for="leftPilot">Left Seat Pilot:</label>
+    <select id="leftPilot"></select>
 
-  <label for="seat2a">Seat 2A (kg):</label>
-  <input type="number" id="seat2a" style="width: 80px;">
+    <label for="rightPilot">Right Seat Pilot:</label>
+    <select id="rightPilot"></select>
 
-  <label for="seat1c">Seat 1C (kg):</label>
-  <input type="number" id="seat1c" style="width: 80px;">
-</div>
-<div>
+    <label for="baggage">Baggage (kg):</label>
+    <input type="number" id="baggage" style="width: 80px;">
+  </div>
+
+  <!-- Seat Weights -->
+  <div>
+    <label for="seat1a">Seat 1A (kg):</label>
+    <input type="number" id="seat1a" style="width: 80px;">
+
+    <label for="seat2a">Seat 2A (kg):</label>
+    <input type="number" id="seat2a" style="width: 80px;">
+
+    <label for="seat1c">Seat 1C (kg):</label>
+    <input type="number" id="seat1c" style="width: 80px;">
+  </div>
+
+  <!-- Config: Patient, Escort, Speed, Burn -->
+  <div>
     <label for="patient">Patient (kg):</label>
     <input type="number" id="patient">
+
     <label for="escort">Escort (kg):</label>
     <input type="number" id="escort">
+
     <label for="speed">Cruise Speed (kt):</label>
     <input type="number" id="speed" value="115">
+
     <label for="fuel">Fuel Burn (kg/hr):</label>
     <input type="number" id="fuel" value="300">
   </div>
 
+  <!-- Route Legs -->
   <div id="legs">
     <div class="leg-row">
       <label>Leg 1:</label>
@@ -143,14 +159,12 @@
       </div>
       <label><input type="checkbox" class="patient-checkbox"> Patient</label>
       <label><input type="checkbox" class="escort-checkbox"> Escort</label>
-      <label for="fuelup">Fuel up Lift (kg):</label>
+      <label>Fuel up Lift (kg):</label>
       <input type="number" class="legfuel">
       <button onclick="removeLeg(this)">Remove</button>
     </div>
   </div>
-
-  <button onclick="addLeg()">Add Leg</button>
-  <button onclick="calculateRoute()">Calculate Route</button>
+</body>
 
   <div id="result"></div>
 
