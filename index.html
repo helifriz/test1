@@ -657,16 +657,11 @@ populateDropdown(to, region);
   const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
   const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
   const seat1c = parseFloat(document.getElementById('seat1c').value) || 0;
-  const patientIncluded = leg.querySelector('.patient-checkbox')?.checked;
-const escortIncluded = leg.querySelector('.escort-checkbox')?.checked;
-const fuelUp = parseFloat(leg.querySelector('.legfuel')?.value) || 0;
-
-const PatientWeight = parseFloat(document.getElementById('patient').value) || 0;
-const EscortWeight = parseFloat(document.getElementById('escort').value) || 0;
-
-const patientWeight = patientIncluded ? globalPatientWeight : 0;
-const escortWeight = escortIncluded ? globalEscortWeight : 0;
   const baggage = parseFloat(document.getElementById('baggage').value) || 0;
+
+  // These are global patient/escort weights
+  const globalPatientWeight = parseFloat(document.getElementById('patient').value) || 0;
+  const globalEscortWeight = parseFloat(document.getElementById('escort').value) || 0;
 
   const selectedHeli = document.getElementById('helicopter').value;
   const heliWeight = HELICOPTERS.find(h => h.reg === selectedHeli)?.weight || 0;
@@ -688,60 +683,68 @@ const escortWeight = escortIncluded ? globalEscortWeight : 0;
     const toSel = leg.querySelector('.to');
     if (!fromSel.value || !toSel.value) return;
 
-    // ... your lat/lon calculations
     let fLat, fLon, tLat, tLon, fName, tName;
 
-if (fromSel.value === "SCENE") {
-  fLat = parseFloat(leg.querySelector('.from-lat').value);
-  fLon = parseFloat(leg.querySelector('.from-lon').value);
-  fName = `SCENE (${fLat}, ${fLon})`;
-} else {
-  const f = waypoints[fromSel.value];
-  fLat = f.lat;
-  fLon = f.lon;
-  fName = fromSel.value;
-}
+    if (fromSel.value === "SCENE") {
+      fLat = parseFloat(leg.querySelector('.from-lat').value);
+      fLon = parseFloat(leg.querySelector('.from-lon').value);
+      fName = `SCENE (${fLat}, ${fLon})`;
+    } else {
+      const f = waypoints[fromSel.value];
+      fLat = f.lat;
+      fLon = f.lon;
+      fName = fromSel.value;
+    }
 
-if (toSel.value === "SCENE") {
-  tLat = parseFloat(leg.querySelector('.to-lat').value);
-  tLon = parseFloat(leg.querySelector('.to-lon').value);
-  tName = `SCENE (${tLat}, ${tLon})`;
-} else {
-  const t = waypoints[toSel.value];
-  tLat = t.lat;
-  tLon = t.lon;
-  tName = toSel.value;
-}
-
+    if (toSel.value === "SCENE") {
+      tLat = parseFloat(leg.querySelector('.to-lat').value);
+      tLon = parseFloat(leg.querySelector('.to-lon').value);
+      tName = `SCENE (${tLat}, ${tLon})`;
+    } else {
+      const t = waypoints[toSel.value];
+      tLat = t.lat;
+      tLon = t.lon;
+      tName = toSel.value;
+    }
 
     const d = haversine(fLat, fLon, tLat, tLon);
     const h = Math.round(Math.atan2(
-      Math.sin((tLon - fLon) * Math.PI/180) * Math.cos(tLat * Math.PI/180),
-      Math.cos(fLat * Math.PI/180) * Math.sin(tLat * Math.PI/180) -
-      Math.sin(fLat * Math.PI/180) * Math.cos(tLat * Math.PI/180) * Math.cos((tLon - fLon) * Math.PI/180)
-    ) * (180/Math.PI) + 360) % 360;
+      Math.sin((tLon - fLon) * Math.PI / 180) * Math.cos(tLat * Math.PI / 180),
+      Math.cos(fLat * Math.PI / 180) * Math.sin(tLat * Math.PI / 180) -
+      Math.sin(fLat * Math.PI / 180) * Math.cos(tLat * Math.PI / 180) * Math.cos((tLon - fLon) * Math.PI / 180)
+    ) * (180 / Math.PI) + 360) % 360;
 
     const timeHr = d / cruise;
-const min = Math.round(timeHr * 60);
-const legFuel = Math.round(timeHr * burn);
+    const min = Math.round(timeHr * 60);
+    const legFuel = Math.round(timeHr * burn);
 
-// ✅ Calculate total weight BEFORE burning fuel
-const patientIncluded = leg.querySelector('.patient-checkbox')?.checked;
-const totalWeight = heliWeight + fuel + leftWeight + rightWeight +
-  seat1a + seat2a + seat1c + baggage + patientWeight + escortWeight;
+    // ✅ These now refer to the current leg:
+    const patientIncluded = leg.querySelector('.patient-checkbox')?.checked;
+    const escortIncluded = leg.querySelector('.escort-checkbox')?.checked;
+    const fuelUp = parseFloat(leg.querySelector('.legfuel')?.value) || 0;
 
-// ⛽ Now burn the leg’s fuel
-fuel -= legFuel;
-fuel += fuelUp;
-dist += d; mins += min; totalFuel += legFuel;
+    const patientWeight = patientIncluded ? globalPatientWeight : 0;
+    const escortWeight = escortIncluded ? globalEscortWeight : 0;
 
+    // ✅ Weight before burning leg fuel
+    const totalWeight = heliWeight + fuel + leftWeight + rightWeight +
+      seat1a + seat2a + seat1c + baggage + patientWeight + escortWeight;
+
+    lastWeight = totalWeight;
+
+    // ✅ Apply fuel burn and uplift
+    fuel -= legFuel;
+    fuel += fuelUp;
+    dist += d;
+    mins += min;
+    totalFuel += legFuel;
 
     table += `<tr>
-      <td>${i+1}</td>
+      <td>${i + 1}</td>
       <td>${fName} ➝ ${tName}</td>
       <td>${d}</td>
       <td>${h.toString().padStart(3, '0')}°</td>
-      <td>${Math.floor(min/60)}h ${min%60}m</td>
+      <td>${Math.floor(min / 60)}h ${min % 60}m</td>
       <td>${legFuel}</td>
       <td>${fuel}</td>
       <td>${totalWeight}</td>
@@ -751,8 +754,8 @@ dist += d; mins += min; totalFuel += legFuel;
   table += `<tr>
     <th colspan="2">TOTAL</th>
     <th>${dist}</th><th>-</th>
-    <th>${Math.floor(mins/60)}h ${mins%60}m</th>
-    <th>${totalFuel}</th><th>${fuel}</th><th></th>
+    <th>${Math.floor(mins / 60)}h ${mins % 60}m</th>
+    <th>${totalFuel}</th><th>${fuel}</th><th>${lastWeight}</th>
   </tr></table>`;
 
   document.getElementById('result').innerHTML = table;
