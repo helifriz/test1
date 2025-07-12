@@ -717,6 +717,7 @@ function disableDuplicatePilot() {
   const burn = parseFloat(document.getElementById('fuel').value);
   const startFuelInput = document.getElementById('startFuel');
   let fuel = parseFloat(startFuelInput.value);
+  const initialFuel = fuel;
   const errors = [];
   if (isNaN(fuel)) {
     errors.push('Start fuel must be a number');
@@ -757,13 +758,14 @@ function disableDuplicatePilot() {
       <th rowspan="2">Takeoff Weight (kg)</th>
     </tr>
     <tr>
-      <th>Used</th>
-      <th>Remain</th>
+      <th>Departure</th>
+      <th>Destination</th>
     </tr>
   </thead>
   <tbody>
 `;
 
+  let finalDestinationFuel = fuel;
   document.querySelectorAll('.leg-row').forEach((leg, i) => {
     const fromSel = leg.querySelector('.from');
     const toSel = leg.querySelector('.to');
@@ -813,7 +815,8 @@ if (toSel.value === "SCENE") {
     const escortWeight = escortIncluded ? globalEscortWeight : 0;
 
     // ✅ Weight before burning leg fuel
-    const totalWeight = heliWeight + fuel + leftWeight + rightWeight +
+    const departureFuel = fuel;
+    const totalWeight = heliWeight + departureFuel + leftWeight + rightWeight +
       seat1a + seat2a + seat1c + baggage + patientWeight + escortWeight;
 
     if (totalWeight > MAX_TAKEOFF_WEIGHT) {
@@ -823,8 +826,10 @@ if (toSel.value === "SCENE") {
 
     lastWeight = totalWeight;
 
-    // ✅ Apply fuel burn and uplift
+    // ✅ Calculate destination fuel then apply uplift
     fuel -= legFuel;
+    const destinationFuel = fuel;
+    finalDestinationFuel = destinationFuel;
     fuel += fuelUp;
     if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
       alert(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
@@ -840,8 +845,8 @@ if (toSel.value === "SCENE") {
       <td>${d}</td>
       <td>${h.toString().padStart(3, '0')}°</td>
       <td>${Math.floor(min / 60)}h ${min % 60}m</td>
-      <td>${legFuel}</td>
-      <td>${fuel}</td>
+      <td>${departureFuel}</td>
+      <td>${destinationFuel}</td>
       <td>${totalWeight}</td>
     </tr>`;
   });
@@ -850,7 +855,7 @@ if (toSel.value === "SCENE") {
     <th colspan="2">TOTAL</th>
     <th>${dist}</th><th>-</th>
     <th>${Math.floor(mins / 60)}h ${mins % 60}m</th>
-    <th>${totalFuel}</th><th>${fuel}</th><th>-</th>
+    <th>${initialFuel}</th><th>${finalDestinationFuel}</th><th>-</th>
   </tr></table>`;
 
   document.getElementById('result').innerHTML = table;
