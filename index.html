@@ -925,6 +925,7 @@ function getWeather() {
     const avgLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
     const avgLon = points.reduce((sum, p) => sum + p.lon, 0) / points.length;
     const windyURL = `https://www.windy.com/route-planner/vfr/${encodeURIComponent(windyRouteStr)}?layer=radar,${avgLat.toFixed(4)},${avgLon.toFixed(4)},7,p:cities`;
+    openInNewTab(windyURL);
 
     const fromPoint = points[0];
     const latInt = Math.round(fromPoint.lat * 10000);
@@ -932,15 +933,7 @@ function getWeather() {
     const isICAO = /^[A-Z]{4}$/.test(fromPoint.original);
     const hl = isICAO ? fromPoint.original : '';
     const metarURL = `https://metar-taf.com/?c=${latInt}.${lonInt}&hl=${hl}`;
-
-    // Open SkyVector first
-    openSkyVector();
-
-    // Then open METAR/TAF information
     openInNewTab(metarURL);
-
-    // Finally open Windy
-    openInNewTab(windyURL);
 
     // 📍 Google Maps for all Scene Calls (manual lat/lon)
     points.forEach(p => {
@@ -952,6 +945,9 @@ function getWeather() {
         openInNewTab(googleMapsURL);
       }
     });
+
+    // Open SkyVector with the same route
+    openSkyVector();
   } catch (err) {
     console.error(err);
     alert(err.message || 'Unable to open weather information');
