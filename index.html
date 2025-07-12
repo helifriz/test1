@@ -769,23 +769,7 @@ function calculateRoute() {
   <tbody>
 `;
 
-  let weightTable = `
-  <table>
-    <thead>
-      <tr>
-        <th>Leg</th>
-        <th>Heli Empty Weight</th>
-        <th>Left Seat</th>
-        <th>Right Seat</th>
-        <th>1A</th>
-        <th>2A</th>
-        <th>1C</th>
-        <th>Stretcher</th>
-        <th>Baggage</th>
-      </tr>
-    </thead>
-    <tbody>
-`;
+  const legWeights = [];
 
   let finalDestinationFuel = fuel;
   document.querySelectorAll('.leg-row').forEach((leg, i) => {
@@ -882,17 +866,16 @@ if (toSel.value === "SCENE") {
     </tr>`;
 
       const seat2aTotal = seat2a + escortWeight;
-      weightTable += `<tr>
-        <td>${i + 1}</td>
-        <td>${heliWeight}</td>
-        <td>${leftWeight}</td>
-        <td>${rightWeight}</td>
-        <td>${seat1a}</td>
-        <td>${seat2aTotal}</td>
-        <td>${seat1c}</td>
-        <td>${patientWeight}</td>
-        <td>${baggage}</td>
-      </tr>`;
+      legWeights.push({
+        heliWeight,
+        leftWeight,
+        rightWeight,
+        seat1a,
+        seat2aTotal,
+        seat1c,
+        patientWeight,
+        baggage
+      });
   });
 
   table += `<tr>
@@ -902,11 +885,34 @@ if (toSel.value === "SCENE") {
     <th>${initialFuel}</th><th>${finalDestinationFuel}</th><th>-</th>
   </tr></table>`;
 
-  weightTable += `</tbody></table>`;
+    let weightTable = '<table><thead><tr><th></th>';
+    legWeights.forEach((_, idx) => {
+      weightTable += `<th>Leg ${idx + 1}</th>`;
+    });
+    weightTable += '</tr></thead><tbody>';
 
-  document.getElementById('result').innerHTML = table;
-  document.getElementById('weightTable').innerHTML = weightTable;
-  document.getElementById('errors').innerHTML = errors.join('<br>');
+    const addRow = (label, key) => {
+      weightTable += `<tr><th>${label}</th>`;
+      legWeights.forEach(w => {
+        weightTable += `<td>${w[key]}</td>`;
+      });
+      weightTable += '</tr>';
+    };
+
+    addRow('Heli Empty Weight', 'heliWeight');
+    addRow('Left Seat', 'leftWeight');
+    addRow('Right Seat', 'rightWeight');
+    addRow('1A', 'seat1a');
+    addRow('2A', 'seat2aTotal');
+    addRow('1C', 'seat1c');
+    addRow('Stretcher', 'patientWeight');
+    addRow('Baggage', 'baggage');
+
+    weightTable += '</tbody></table>';
+
+    document.getElementById('result').innerHTML = table;
+    document.getElementById('weightTable').innerHTML = weightTable;
+    document.getElementById('errors').innerHTML = errors.join('<br>');
 }
 
 function getPoints() {
