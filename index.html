@@ -177,7 +177,6 @@
   <button onclick="addLeg()">Add Leg</button>
   <button onclick="calculateRoute()">Calculate Route</button>
   <button onclick="getWeather()">Get Weather</button>
-  <button onclick="openSkyVector()">SkyVector</button>
 </div>
 </body>
 
@@ -912,6 +911,9 @@ function getWeather() {
         window.open(googleMapsURL, '_blank');
       }
     });
+
+    // Open SkyVector with the same route
+    openSkyVector();
   } catch (err) {
     console.error(err);
     alert('Unable to open weather information');
