@@ -180,6 +180,7 @@
 </body>
 
   <div id="result"></div>
+  <div id="errors" style="color: red;"></div>
 
   <script>
 
@@ -714,9 +715,13 @@ function disableDuplicatePilot() {
   const burn = parseFloat(document.getElementById('fuel').value);
   const startFuelInput = document.getElementById('startFuel');
   let fuel = parseFloat(startFuelInput.value);
-  if (isNaN(fuel) || fuel < MIN_FUEL || fuel > MAX_FUEL) {
+  const errors = [];
+  if (isNaN(fuel)) {
+    errors.push('Start fuel must be a number');
+    fuel = 0;
+  } else if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
     alert(`Start fuel must be between ${MIN_FUEL} and ${MAX_FUEL} kg`);
-    return;
+    errors.push(`Start fuel must be between ${MIN_FUEL} and ${MAX_FUEL} kg`);
   }
   const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
   const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
@@ -811,7 +816,7 @@ if (toSel.value === "SCENE") {
 
     if (totalWeight > MAX_TAKEOFF_WEIGHT) {
       alert(`Takeoff weight exceeds ${MAX_TAKEOFF_WEIGHT} kg on leg ${i + 1}`);
-      return;
+      errors.push(`Takeoff weight exceeds ${MAX_TAKEOFF_WEIGHT} kg on leg ${i + 1}`);
     }
 
     lastWeight = totalWeight;
@@ -821,7 +826,7 @@ if (toSel.value === "SCENE") {
     fuel += fuelUp;
     if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
       alert(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
-      return;
+      errors.push(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
     }
     dist += d;
     mins += min;
@@ -847,6 +852,7 @@ if (toSel.value === "SCENE") {
   </tr></table>`;
 
   document.getElementById('result').innerHTML = table;
+  document.getElementById('errors').innerHTML = errors.join('<br>');
 }
 
 
