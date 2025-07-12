@@ -830,6 +830,10 @@ if (toSel.value === "SCENE") {
     fuel -= legFuel;
     const destinationFuel = fuel;
     finalDestinationFuel = destinationFuel;
+    if (destinationFuel < MIN_FUEL) {
+      alert(`Fuel level at destination must be at least ${MIN_FUEL} kg on leg ${i + 1}`);
+      errors.push(`Fuel level at destination must be at least ${MIN_FUEL} kg on leg ${i + 1}`);
+    }
     fuel += fuelUp;
     if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
       alert(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
