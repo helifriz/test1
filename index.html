@@ -722,9 +722,12 @@ function disableDuplicatePilot() {
   if (isNaN(fuel)) {
     errors.push('Start fuel must be a number');
     fuel = 0;
-  } else if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
-    alert(`Start fuel must be between ${MIN_FUEL} and ${MAX_FUEL} kg`);
-    errors.push(`Start fuel must be between ${MIN_FUEL} and ${MAX_FUEL} kg`);
+  } else if (fuel < MIN_FUEL) {
+    alert(`Start fuel below ${MIN_FUEL} kg (~20 min)`);
+    errors.push(`Start fuel must be at least ${MIN_FUEL} kg (~20 min)`);
+  } else if (fuel > MAX_FUEL) {
+    alert(`Start fuel must not exceed ${MAX_FUEL} kg`);
+    errors.push(`Start fuel must not exceed ${MAX_FUEL} kg`);
   }
   const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
   const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
@@ -835,9 +838,12 @@ if (toSel.value === "SCENE") {
       errors.push(`Fuel level at destination must be at least ${MIN_FUEL} kg on leg ${i + 1}`);
     }
     fuel += fuelUp;
-    if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
-      alert(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
-      errors.push(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
+    if (fuel < MIN_FUEL) {
+      alert(`Fuel level below ${MIN_FUEL} kg (~20 min) on leg ${i + 1}`);
+      errors.push(`Fuel level must be at least ${MIN_FUEL} kg (~20 min) on leg ${i + 1}`);
+    } else if (fuel > MAX_FUEL) {
+      alert(`Fuel level must not exceed ${MAX_FUEL} kg on leg ${i + 1}`);
+      errors.push(`Fuel level must not exceed ${MAX_FUEL} kg on leg ${i + 1}`);
     }
     dist += d;
     mins += min;
