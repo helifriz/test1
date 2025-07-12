@@ -841,11 +841,11 @@ if (toSel.value === "SCENE") {
     }
     fuel += fuelUp;
     if (fuel < MIN_FUEL && !lowFuelWarningShown) {
-      alert(`Fuel level below ${MIN_FUEL} kg (~20 min) on leg ${i + 1}`);
-      errors.push(`Fuel level must be at least ${MIN_FUEL} kg (~20 min) on leg ${i + 1}`);
+      alert(`Fuel level below ${MIN_FUEL} kg (~20 min) on leg ${i + 2}`);
+      errors.push(`Fuel level must be at least ${MIN_FUEL} kg (~20 min) on leg ${i + 2}`);
     } else if (fuel > MAX_FUEL) {
-      alert(`Fuel level must not exceed ${MAX_FUEL} kg on leg ${i + 1}`);
-      errors.push(`Fuel level must not exceed ${MAX_FUEL} kg on leg ${i + 1}`);
+      alert(`Fuel level must not exceed ${MAX_FUEL} kg on leg ${i + 2}`);
+      errors.push(`Fuel level must not exceed ${MAX_FUEL} kg on leg ${i + 2}`);
     }
     dist += d;
     mins += min;
