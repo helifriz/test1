@@ -651,14 +651,14 @@ function disableDuplicatePilot() {
           <label>Leg ${legCount}:</label>
           <select class="from" onchange="toggleSceneInputs(this)"></select>
           <div class="scene-inputs from-scene">
-            Lat: <input type="number" step="0.0001" class="from-lat">
-            Lon: <input type="number" step="0.0001" class="from-lon">
+            Lat: <input type="number" placeholder="49.1939" step="0.0001" class="from-lat">
+            Lon: <input type="number" placeholder="-123.1833" step="0.0001" class="from-lon">
           </div>
           ➝
           <select class="to" onchange="toggleSceneInputs(this)"></select>
           <div class="scene-inputs to-scene">
-            Lat: <input type="number" step="0.0001" class="to-lat">
-            Lon: <input type="number" step="0.0001" class="to-lon">
+            Lat: <input type="number" placeholder="49.1939" step="0.0001" class="to-lat">
+            Lon: <input type="number" placeholder="-123.1833" step="0.0001" class="to-lon">
           </div>
           <button class="remove-leg-btn">Remove</button>
         </td>
