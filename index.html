@@ -176,7 +176,7 @@
   <div style="margin-top: 10px;">
   <button onclick="addLeg()">Add Leg</button>
   <button onclick="calculateRoute()">Calculate Route</button>
-  <button onclick="openforeflight()">Open Foreflight</button>
+  <button onclick="openForeFlight()">Open Foreflight</button>
   <button onclick="getWeather()">Get Weather</button>
 </div>
 </body>
@@ -955,6 +955,35 @@ function toSkyVectorDMM(lat, lon) {
     return `${degStr}${min}${dir}`;
   }
   return `${convert(lat, true)}${convert(lon, false)}`;
+}
+function convertDDMMmm(value, isLat) {
+  const dir = isLat ? (value >= 0 ? 'N' : 'S') : (value >= 0 ? 'E' : 'W');
+  const abs = Math.abs(value);
+  const deg = Math.floor(abs);
+  const min = (abs - deg) * 60;
+  const paddedDeg = isLat ? deg.toString().padStart(2, '0') : deg.toString().padStart(3, '0');
+  const minStr = min.toFixed(2).padStart(5, '0');
+  return `${paddedDeg}${minStr}${dir}`;
+}
+
+function formatForForeFlight(p) {
+  if (p.original.includes(',')) {
+    const lat = convertDDMMmm(p.lat, true);
+    const lon = convertDDMMmm(p.lon, false);
+    return `${lat}/${lon}`;
+  }
+  return p.original;
+}
+
+function openForeFlight() {
+  try {
+    const points = getPoints();
+    const route = points.map(formatForForeFlight).join('+');
+    const url = `foreflightmobile://maps/search?q=${route}`;
+    window.open(url, '_blank');
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 
