@@ -176,10 +176,12 @@
   <div style="margin-top: 10px;">
   <button onclick="addLeg()">Add Leg</button>
   <button onclick="calculateRoute()">Calculate Route</button>
+  <button onclick="getWeather()">Get Weather</button>
 </div>
 </body>
 
   <div id="result"></div>
+  <div id="errors" style="color: red;"></div>
 
   <script>
 
@@ -714,9 +716,13 @@ function disableDuplicatePilot() {
   const burn = parseFloat(document.getElementById('fuel').value);
   const startFuelInput = document.getElementById('startFuel');
   let fuel = parseFloat(startFuelInput.value);
-  if (isNaN(fuel) || fuel < MIN_FUEL || fuel > MAX_FUEL) {
+  const errors = [];
+  if (isNaN(fuel)) {
+    errors.push('Start fuel must be a number');
+    fuel = 0;
+  } else if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
     alert(`Start fuel must be between ${MIN_FUEL} and ${MAX_FUEL} kg`);
-    return;
+    errors.push(`Start fuel must be between ${MIN_FUEL} and ${MAX_FUEL} kg`);
   }
   const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
   const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
@@ -811,7 +817,7 @@ if (toSel.value === "SCENE") {
 
     if (totalWeight > MAX_TAKEOFF_WEIGHT) {
       alert(`Takeoff weight exceeds ${MAX_TAKEOFF_WEIGHT} kg on leg ${i + 1}`);
-      return;
+      errors.push(`Takeoff weight exceeds ${MAX_TAKEOFF_WEIGHT} kg on leg ${i + 1}`);
     }
 
     lastWeight = totalWeight;
@@ -821,7 +827,7 @@ if (toSel.value === "SCENE") {
     fuel += fuelUp;
     if (fuel < MIN_FUEL || fuel > MAX_FUEL) {
       alert(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
-      return;
+      errors.push(`Fuel level must be between ${MIN_FUEL} and ${MAX_FUEL} kg on leg ${i + 1}`);
     }
     dist += d;
     mins += min;
@@ -847,6 +853,65 @@ if (toSel.value === "SCENE") {
   </tr></table>`;
 
   document.getElementById('result').innerHTML = table;
+  document.getElementById('errors').innerHTML = errors.join('<br>');
+}
+
+function getPoints() {
+  const legs = document.querySelectorAll('.leg-row');
+  const pts = [];
+  legs.forEach((leg, idx) => {
+    const fromSel = leg.querySelector('.from');
+    const toSel = leg.querySelector('.to');
+    if (!fromSel.value || !toSel.value) return;
+    let fLat, fLon;
+    if (fromSel.value === "SCENE") {
+      fLat = parseFloat(leg.querySelector('.from-lat').value);
+      fLon = parseFloat(leg.querySelector('.from-lon').value);
+    } else {
+      const f = waypoints[fromSel.value];
+      fLat = f.lat;
+      fLon = f.lon;
+    }
+    if (pts.length === 0) {
+      pts.push({ lat: fLat, lon: fLon, original: fromSel.value });
+    }
+    let tLat, tLon;
+    if (toSel.value === "SCENE") {
+      tLat = parseFloat(leg.querySelector('.to-lat').value);
+      tLon = parseFloat(leg.querySelector('.to-lon').value);
+    } else {
+      const t = waypoints[toSel.value];
+      tLat = t.lat;
+      tLon = t.lon;
+    }
+    pts.push({ lat: tLat, lon: tLon, original: toSel.value });
+  });
+  return pts;
+}
+
+function getWeather() {
+  try {
+    const points = getPoints();
+    if (points.length === 0) {
+      alert('Please complete at least one leg before getting weather.');
+      return;
+    }
+    const windyRouteStr = points.map(p => `${p.lat},${p.lon}`).join(';');
+    const avgLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
+    const avgLon = points.reduce((sum, p) => sum + p.lon, 0) / points.length;
+    const windyURL = `https://www.windy.com/route-planner/vfr/${encodeURIComponent(windyRouteStr)}?layer=radar,${avgLat.toFixed(4)},${avgLon.toFixed(4)},7,p:cities`;
+    window.open(windyURL, '_blank');
+
+    const fromPoint = points[0];
+    const latInt = Math.round(fromPoint.lat * 10000);
+    const lonInt = Math.round(fromPoint.lon * 10000);
+    const isICAO = /^[A-Z]{4}$/.test(fromPoint.original);
+    const hl = isICAO ? fromPoint.original : '';
+    const metarURL = `https://metar-taf.com/?c=${latInt}.${lonInt}&hl=${hl}`;
+    window.open(metarURL, '_blank');
+  } catch (e) {
+    alert('Failed to open weather links: ' + e.message);
+  }
 }
 
 
