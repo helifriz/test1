@@ -183,12 +183,14 @@
 
   <script>
 
-    const HELICOPTERS = [
+const HELICOPTERS = [
   { reg: "C-GHAA", weight: 1560 },
   { reg: "C-GHBB", weight: 1585 },
   { reg: "C-GHCC", weight: 1600 },
   { reg: "C-GHDD", weight: 1570 }
 ];
+
+const MAX_FUEL = 904; // maximum usable fuel in kg
 
 function populateHelicopterDropdown() {
   const heliSelect = document.getElementById('helicopter');
@@ -708,7 +710,12 @@ function disableDuplicatePilot() {
     function calculateRoute() {
   const cruise = parseFloat(document.getElementById('speed').value);
   const burn = parseFloat(document.getElementById('fuel').value);
-  let fuel = parseFloat(document.getElementById('startFuel').value);
+  const startFuelInput = document.getElementById('startFuel');
+  let fuel = parseFloat(startFuelInput.value);
+  if (isNaN(fuel) || fuel < 0 || fuel > MAX_FUEL) {
+    alert(`Start fuel must be between 0 and ${MAX_FUEL} kg`);
+    return;
+  }
   const seat1a = parseFloat(document.getElementById('seat1a').value) || 0;
   const seat2a = parseFloat(document.getElementById('seat2a').value) || 0;
   const seat1c = parseFloat(document.getElementById('seat1c').value) || 0;
@@ -805,6 +812,10 @@ if (toSel.value === "SCENE") {
     // ✅ Apply fuel burn and uplift
     fuel -= legFuel;
     fuel += fuelUp;
+    if (fuel < 0 || fuel > MAX_FUEL) {
+      alert(`Fuel level out of range on leg ${i + 1}`);
+      return;
+    }
     dist += d;
     mins += min;
     totalFuel += legFuel;
