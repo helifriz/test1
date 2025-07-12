@@ -79,6 +79,16 @@
       background-color: #f0f0f0;
       color: #333;
     }
+
+    /* Styling for the generated weight table */
+    #weightTable table.weight-table {
+      font-size: 14px;
+    }
+
+    #weightTable table.weight-table th:first-child,
+    #weightTable table.weight-table td:first-child {
+      width: 120px;
+    }
   </style>
 </head>
 <body>
@@ -885,7 +895,7 @@ if (toSel.value === "SCENE") {
     <th>${initialFuel}</th><th>${finalDestinationFuel}</th><th>-</th>
   </tr></table>`;
 
-    let weightTable = '<table><thead><tr><th></th>';
+    let weightTable = '<table class="weight-table"><thead><tr><th></th>';
     legWeights.forEach((_, idx) => {
       weightTable += `<th>Leg ${idx + 1}</th>`;
     });
