@@ -177,6 +177,7 @@
   <button onclick="addLeg()">Add Leg</button>
   <button onclick="calculateRoute()">Calculate Route</button>
   <button onclick="getWeather()">Get Weather</button>
+  <button onclick="openSkyVector()">SkyVector</button>
 </div>
 </body>
 
@@ -904,6 +905,42 @@ function getWeather() {
     console.error(err);
     alert('Unable to open weather information');
   }
+}
+
+function openSkyVector() {
+  try {
+    const points = getPoints();
+    if (!points.length) {
+      alert('No route points to build a SkyVector link');
+      return;
+    }
+
+    const skyVectorRoute = points
+      .map(p => toSkyVectorDMM(p.lat, p.lon))
+      .join('+');
+
+    if (!skyVectorRoute) {
+      throw new Error('No valid points to create a SkyVector route.');
+    }
+
+    const skyVectorURL = `https://skyvector.com/?fpl=${encodeURIComponent(skyVectorRoute)}`;
+    window.open(skyVectorURL, '_blank');
+  } catch (err) {
+    console.error('Failed to open SkyVector:', err);
+    alert('Unable to open SkyVector');
+  }
+}
+
+function toSkyVectorDMM(lat, lon) {
+  function convert(value, isLat) {
+    const abs = Math.abs(value);
+    const deg = Math.floor(abs);
+    const min = Math.round((abs - deg) * 60).toString().padStart(2, '0');
+    const dir = isLat ? (value >= 0 ? 'N' : 'S') : (value >= 0 ? 'E' : 'W');
+    const degStr = deg.toString().padStart(isLat ? 2 : 3, '0');
+    return `${degStr}${min}${dir}`;
+  }
+  return `${convert(lat, true)}${convert(lon, false)}`;
 }
 
 
