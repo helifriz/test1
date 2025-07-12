@@ -871,8 +871,13 @@ function getPoints() {
 
   function extractPoint(leg, prefix, sel) {
     if (sel.value === 'SCENE') {
-      const lat = parseFloat(leg.querySelector('.' + prefix + '-lat').value);
-      const lon = parseFloat(leg.querySelector('.' + prefix + '-lon').value);
+      const latInput = leg.querySelector('.' + prefix + '-lat');
+      const lonInput = leg.querySelector('.' + prefix + '-lon');
+      const lat = parseFloat(latInput.value);
+      const lon = parseFloat(lonInput.value);
+      if (isNaN(lat) || isNaN(lon)) {
+        throw new Error('Scene latitude and longitude are required');
+      }
       return { lat, lon, original: sel.value };
     }
     const wp = waypoints[sel.value];
@@ -917,7 +922,7 @@ function getWeather() {
     openSkyVector();
   } catch (err) {
     console.error(err);
-    alert('Unable to open weather information');
+    alert(err.message || 'Unable to open weather information');
   }
 }
 
@@ -941,7 +946,7 @@ function openSkyVector() {
     window.open(skyVectorURL, '_blank');
   } catch (err) {
     console.error('Failed to open SkyVector:', err);
-    alert('Unable to open SkyVector');
+    alert(err.message || 'Unable to open SkyVector');
   }
 }
 
