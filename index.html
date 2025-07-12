@@ -856,6 +856,56 @@ if (toSel.value === "SCENE") {
   document.getElementById('errors').innerHTML = errors.join('<br>');
 }
 
+function getPoints() {
+  const points = [];
+  document.querySelectorAll('.leg-row').forEach((leg, idx) => {
+    const fromSel = leg.querySelector('.from');
+    const toSel = leg.querySelector('.to');
+    if (!fromSel.value || !toSel.value) return;
+
+    if (idx === 0) points.push(extractPoint(leg, 'from', fromSel));
+    points.push(extractPoint(leg, 'to', toSel));
+  });
+  return points;
+
+  function extractPoint(leg, prefix, sel) {
+    if (sel.value === 'SCENE') {
+      const lat = parseFloat(leg.querySelector('.' + prefix + '-lat').value);
+      const lon = parseFloat(leg.querySelector('.' + prefix + '-lon').value);
+      return { lat, lon, original: sel.value };
+    }
+    const wp = waypoints[sel.value];
+    return { lat: wp.lat, lon: wp.lon, original: sel.value };
+  }
+}
+
+function getWeather() {
+  try {
+    const points = getPoints();
+    if (!points.length) {
+      alert('No route points to build weather links');
+      return;
+    }
+
+    const windyRouteStr = points.map(p => `${p.lat},${p.lon}`).join(';');
+    const avgLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
+    const avgLon = points.reduce((sum, p) => sum + p.lon, 0) / points.length;
+    const windyURL = `https://www.windy.com/route-planner/vfr/${encodeURIComponent(windyRouteStr)}?layer=radar,${avgLat.toFixed(4)},${avgLon.toFixed(4)},7,p:cities`;
+    window.open(windyURL, '_blank');
+
+    const fromPoint = points[0];
+    const latInt = Math.round(fromPoint.lat * 10000);
+    const lonInt = Math.round(fromPoint.lon * 10000);
+    const isICAO = /^[A-Z]{4}$/.test(fromPoint.original);
+    const hl = isICAO ? fromPoint.original : '';
+    const metarURL = `https://metar-taf.com/?c=${latInt}.${lonInt}&hl=${hl}`;
+    window.open(metarURL, '_blank');
+  } catch (err) {
+    console.error(err);
+    alert('Unable to open weather information');
+  }
+}
+
 
     populatePilotDropdowns();
     populateAllDropdowns();
