@@ -151,8 +151,8 @@
           <label>Leg 1:</label>
           <select class="from" onchange="toggleSceneInputs(this)"></select>
           <div class="scene-inputs from-scene">
-            Lat: <input type="number" step="0.0001" class="from-lat">
-            Lon: <input type="number" step="0.0001" class="from-lon">
+            Lat: <input type="number" placeholder="49.1939" step="0.0001" class="from-lat">
+            Lon: <input type="number" placeholder="-123.1833" step="0.0001" class="from-lon">
           </div>
           ➝
           <select class="to" onchange="toggleSceneInputs(this)"></select>
@@ -176,6 +176,7 @@
   <div style="margin-top: 10px;">
   <button onclick="addLeg()">Add Leg</button>
   <button onclick="calculateRoute()">Calculate Route</button>
+  <button onclick="openforeflight()">Open Foreflight</button>
   <button onclick="getWeather()">Get Weather</button>
 </div>
 </body>
