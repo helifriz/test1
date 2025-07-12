@@ -191,6 +191,7 @@ const HELICOPTERS = [
 ];
 
 const MAX_FUEL = 904; // maximum usable fuel in kg
+const MAX_TAKEOFF_WEIGHT = 4800; // maximum takeoff weight in kg
 
 function populateHelicopterDropdown() {
   const heliSelect = document.getElementById('helicopter');
@@ -806,6 +807,11 @@ if (toSel.value === "SCENE") {
     // ✅ Weight before burning leg fuel
     const totalWeight = heliWeight + fuel + leftWeight + rightWeight +
       seat1a + seat2a + seat1c + baggage + patientWeight + escortWeight;
+
+    if (totalWeight > MAX_TAKEOFF_WEIGHT) {
+      alert(`Takeoff weight exceeds ${MAX_TAKEOFF_WEIGHT} kg on leg ${i + 1}`);
+      return;
+    }
 
     lastWeight = totalWeight;
 
