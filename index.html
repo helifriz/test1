@@ -198,16 +198,6 @@ const MAX_FUEL = 904; // maximum usable fuel in kg
 const MIN_FUEL = 100; // minimum fuel in kg
 const MAX_TAKEOFF_WEIGHT = 4800; // maximum takeoff weight in kg
 
-function openInNewTab(url) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
 function populateHelicopterDropdown() {
   const heliSelect = document.getElementById('helicopter');
   heliSelect.innerHTML = "";
@@ -920,12 +910,13 @@ function getWeather() {
       alert('No route points to build weather links');
       return;
     }
+    
 
     const windyRouteStr = points.map(p => `${p.lat},${p.lon}`).join(';');
     const avgLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
     const avgLon = points.reduce((sum, p) => sum + p.lon, 0) / points.length;
     const windyURL = `https://www.windy.com/route-planner/vfr/${encodeURIComponent(windyRouteStr)}?layer=radar,${avgLat.toFixed(4)},${avgLon.toFixed(4)},7,p:cities`;
-    openInNewTab(windyURL);
+    // window.open(windyURL, '_blank');
 
     const fromPoint = points[0];
     const latInt = Math.round(fromPoint.lat * 10000);
@@ -933,7 +924,7 @@ function getWeather() {
     const isICAO = /^[A-Z]{4}$/.test(fromPoint.original);
     const hl = isICAO ? fromPoint.original : '';
     const metarURL = `https://metar-taf.com/?c=${latInt}.${lonInt}&hl=${hl}`;
-    openInNewTab(metarURL);
+    window.open(metarURL, '_blank');
 
     // 📍 Google Maps for all Scene Calls (manual lat/lon)
     points.forEach(p => {
@@ -942,7 +933,7 @@ function getWeather() {
       if (!isICAO) {
         // This is a scene call (manual lat/lon)
         const googleMapsURL = `https://maps.google.com/?q=${p.lat},${p.lon}&t=k`;
-        openInNewTab(googleMapsURL);
+        window.open(googleMapsURL, '_blank');
       }
     });
 
@@ -971,7 +962,7 @@ function openSkyVector() {
     }
 
     const skyVectorURL = `https://skyvector.com/?fpl=${encodeURIComponent(skyVectorRoute)}`;
-    openInNewTab(skyVectorURL);
+    window.open(skyVectorURL, '_blank');
   } catch (err) {
     console.error('Failed to open SkyVector:', err);
     alert(err.message || 'Unable to open SkyVector');
@@ -1013,7 +1004,7 @@ function openForeFlight() {
     const points = getPoints();
     const route = points.map(formatForForeFlight).join('+');
     const url = `foreflightmobile://maps/search?q=${route}`;
-    openInNewTab(url);
+    window.open(url, '_blank');
   } catch (err) {
     console.error(err);
   }
