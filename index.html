@@ -180,10 +180,9 @@
   <button onclick="openSkyVector()">Open SkyVector</button>
   <button onclick="getWeather()">Get Weather</button>
   <button onclick="composeEmail()">Compose Email</button>
-</div>
-</body>
 
   <div id="result"></div>
+  <div id="weightTable"></div>
   <div id="errors" style="color: red;"></div>
 
   <script>
@@ -714,7 +713,7 @@ function disableDuplicatePilot() {
       return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 0.539957);
     }
 
-    function calculateRoute() {
+function calculateRoute() {
   const cruise = parseFloat(document.getElementById('speed').value);
   const burn = parseFloat(document.getElementById('fuel').value);
   const startFuelInput = document.getElementById('startFuel');
@@ -768,6 +767,25 @@ function disableDuplicatePilot() {
     </tr>
   </thead>
   <tbody>
+`;
+
+  let weightTable = `
+  <table>
+    <thead>
+      <tr>
+        <th>Leg</th>
+        <th>Heli Empty Weight</th>
+        <th>Left Seat</th>
+        <th>Right Seat</th>
+        <th>1A</th>
+        <th>2A</th>
+        <th>1C</th>
+        <th>Stretcher</th>
+        <th>Baggage</th>
+        <th>Escort</th>
+      </tr>
+    </thead>
+    <tbody>
 `;
 
   let finalDestinationFuel = fuel;
@@ -863,6 +881,19 @@ if (toSel.value === "SCENE") {
       <td>${destinationFuel}</td>
       <td>${totalWeight}</td>
     </tr>`;
+
+    weightTable += `<tr>
+      <td>${i + 1}</td>
+      <td>${heliWeight}</td>
+      <td>${leftWeight}</td>
+      <td>${rightWeight}</td>
+      <td>${seat1a}</td>
+      <td>${seat2a}</td>
+      <td>${seat1c}</td>
+      <td>${patientWeight}</td>
+      <td>${baggage}</td>
+      <td>${escortWeight}</td>
+    </tr>`;
   });
 
   table += `<tr>
@@ -872,7 +903,10 @@ if (toSel.value === "SCENE") {
     <th>${initialFuel}</th><th>${finalDestinationFuel}</th><th>-</th>
   </tr></table>`;
 
+  weightTable += `</tbody></table>`;
+
   document.getElementById('result').innerHTML = table;
+  document.getElementById('weightTable').innerHTML = weightTable;
   document.getElementById('errors').innerHTML = errors.join('<br>');
 }
 
