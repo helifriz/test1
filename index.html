@@ -916,7 +916,7 @@ function getWeather() {
     const avgLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
     const avgLon = points.reduce((sum, p) => sum + p.lon, 0) / points.length;
     const windyURL = `https://www.windy.com/route-planner/vfr/${encodeURIComponent(windyRouteStr)}?layer=radar,${avgLat.toFixed(4)},${avgLon.toFixed(4)},7,p:cities`;
-    // window.open(windyURL, '_blank');
+    window.open(windyURL, '_blank');
 
     const fromPoint = points[0];
     const latInt = Math.round(fromPoint.lat * 10000);
