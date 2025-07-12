@@ -901,6 +901,17 @@ function getWeather() {
     const hl = isICAO ? fromPoint.original : '';
     const metarURL = `https://metar-taf.com/?c=${latInt}.${lonInt}&hl=${hl}`;
     window.open(metarURL, '_blank');
+
+    // 📍 Google Maps for all Scene Calls (manual lat/lon)
+    points.forEach(p => {
+      // Treat as ICAO if original is 3-4 letters/numbers AND no comma (not lat/lon)
+      const isICAO = /^[A-Z0-9]{3,4}$/.test(p.original);
+      if (!isICAO) {
+        // This is a scene call (manual lat/lon)
+        const googleMapsURL = `https://maps.google.com/?q=${p.lat},${p.lon}`;
+        window.open(googleMapsURL, '_blank');
+      }
+    });
   } catch (err) {
     console.error(err);
     alert('Unable to open weather information');
