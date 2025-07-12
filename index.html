@@ -931,7 +931,7 @@ function getWeather() {
       const isICAO = /^[A-Z0-9]{3,4}$/.test(p.original);
       if (!isICAO) {
         // This is a scene call (manual lat/lon)
-        const googleMapsURL = `https://maps.google.com/?q=${p.lat},${p.lon}`;
+        const googleMapsURL = `https://maps.google.com/?q=${p.lat},${p.lon}&t=k`;
         window.open(googleMapsURL, '_blank');
       }
     });
