@@ -782,7 +782,6 @@ function calculateRoute() {
         <th>1C</th>
         <th>Stretcher</th>
         <th>Baggage</th>
-        <th>Escort</th>
       </tr>
     </thead>
     <tbody>
@@ -882,18 +881,18 @@ if (toSel.value === "SCENE") {
       <td>${totalWeight}</td>
     </tr>`;
 
-    weightTable += `<tr>
-      <td>${i + 1}</td>
-      <td>${heliWeight}</td>
-      <td>${leftWeight}</td>
-      <td>${rightWeight}</td>
-      <td>${seat1a}</td>
-      <td>${seat2a}</td>
-      <td>${seat1c}</td>
-      <td>${patientWeight}</td>
-      <td>${baggage}</td>
-      <td>${escortWeight}</td>
-    </tr>`;
+      const seat2aTotal = seat2a + escortWeight;
+      weightTable += `<tr>
+        <td>${i + 1}</td>
+        <td>${heliWeight}</td>
+        <td>${leftWeight}</td>
+        <td>${rightWeight}</td>
+        <td>${seat1a}</td>
+        <td>${seat2aTotal}</td>
+        <td>${seat1c}</td>
+        <td>${patientWeight}</td>
+        <td>${baggage}</td>
+      </tr>`;
   });
 
   table += `<tr>
