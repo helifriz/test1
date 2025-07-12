@@ -818,7 +818,7 @@ if (toSel.value === "SCENE") {
     // ✅ Apply fuel burn and uplift
     fuel -= legFuel;
     fuel += fuelUp;
-    if (fuel < 0 || fuel > MAX_FUEL) {
+    if (fuel < 100 || fuel > MAX_FUEL) {
       alert(`Fuel level out of range on leg ${i + 2}`);
       return;
     }
